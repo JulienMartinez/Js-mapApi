@@ -1,7 +1,7 @@
 import config from '../../app.config';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, {Map, Marker} from 'mapbox-gl';
 import { LocalEvent } from './Entity/LocalEvent'
 
 import '../../assets/css/reset.css';
@@ -30,7 +30,7 @@ class App {
 
     mainMap = null;
 
-    // domCurrentWeather = null;
+
 
     constructor() {
         this.eventStorage = new LocalStorageService( STORAGE_KEY );
@@ -82,24 +82,6 @@ class App {
         });
         this.mainMap.addControl( geoLocControl, 'top-right' );
 
-        // Ajout marlker avec popup
-        const markerPop = new mapboxgl.Marker({
-            color: '#f0c'
-        });
-        markerPop.setLngLat({
-            lon: 2.454649789,
-            lat: 42.45648974698
-        });
-
-        const popup = new mapboxgl.Popup();
-        popup.setHTML('<h2>Coucou</h2><p>Hello there</p>')
-
-        markerPop.setPopup( popup )
-        markerPop.addTo( this.mainMap );
-
-        const markerPopDiv = markerPop.getElement();
-        markerPopDiv.title = 'Coucou';
-
 
         // - Initialisation des gestionnaires d'événement
         this.elForm.addEventListener( 'submit', this.handlerSubmitNew.bind(this) );
@@ -110,27 +92,21 @@ class App {
         this.elCordLon.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
         this.elCordLat.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
 
-
         let itemStorage = this.eventStorage.getJSON();
         // Si le stockage n'est pas encore crée on ne pass à la suite
         if( itemStorage === null ) return;
 
         for ( let notaJSON of itemStorage ) this.arrMarker.push( new LocalEvent( notaJSON));
 
-        this.render();
+        this.render(this.arrMarker);
+
     }
 
-
-    render() {
-        // // Tri par date
-        // this.arrMarker.sort( ( notaA, notaB ) => notaB.dateUpdate - notaA.dateUpdate );
-        //
-        // // Vidange de l'affichage actuel
-        // this.elBoard.innerHTML = '';
-        //
-        // for( let nota of this.arrMarker ) this.elBoard.append( nota.getDOM()  );
+    render(arrLocalEvent) {
+        for(let itemJSON of arrLocalEvent) {
+            this.setMarker(itemJSON)
+        }
     }
-
 
 
     // Gestionnaires d'événements
@@ -152,6 +128,13 @@ class App {
         this.eventStorage.clear();
     }
 
+    setMarker(localEvent) {
+        const marker = new mapboxgl.Marker();
+        marker.setLngLat({lon: localEvent.longitude, lat: localEvent.latitude});
+        marker.addTo(this.mainMap);
+    }
+
+
     /**
      * Gestionnaire d'événement de soumission du formulaire d'ajout
      */
@@ -163,36 +146,21 @@ class App {
 
         // Contrôle de la saisie
         let
-            hasError = false,
-            regAlphaNum = new RegExp('^[A-Za-z0-9 ]+$'),
             strTitle = this.elNewTitle.value.trim(),
-            strContent = this.elNewContent.value.trim();
+            strContent = this.elNewContent.value.trim(),
+            strDateCreate = this.elNewDateStart.value.trim(),
+            strDateEnd = this.elNewDateEnd.value.trim(),
+            strLong = this.elCordLon.value.trim(),
+            strlat = this.elCordLat.value.trim();
 
-        // --- Traitement des erreur
-
-        // -- Title
-        // - Si la chaine est vide
-        // - ou contient autre chose que des chiffres et des lettres
-        // => ERREUR
-        if( !regAlphaNum.test( strTitle ) ) {
-            hasError = true;
-            this.elNewTitle.value = '';
-            this.elNewTitle.classList.add( 'error' );
-        }
-
-        // -- Content
-        // Si la chaine est vide: ERREUR
-        if( strContent.length <= 0 ) {
-            hasError = true;
-            this.elNewContent.classList.add( 'error' );
-        }
-
-        // S'il y a au moins une erreur on interrompt le traitement
-        if( hasError ) return;
 
         // Vidange du formulaire
         this.elNewTitle.value
             = this.elNewContent.value
+            = this.elNewDateStart.value
+            = this.elNewDateEnd.value
+            = this.elCordLon.value
+            = this.elCordLat.value
             = '';
 
         // Traitement des données
@@ -203,17 +171,29 @@ class App {
             = Date.now();
         newEvent.title = strTitle;
         newEvent.content = strContent;
+        newEvent.dateCreate = strDateCreate;
+        newEvent.dateEnd = strDateEnd;
+        newEvent.longitude = strLong;
+        newEvent.latitude =  strlat;
+
+        this.setMarker(newEvent);
 
         // Enregistrement
         // Array.push() permet d'insérer une valeur à fin d'un tableau
         this.arrMarker.push( new LocalEvent(newEvent ));
 
         // Mise à jour de l'affichage
-        this.render();
+        this.render(this.arrMarker);
 
         // Persistance des données
         this.eventStorage.setJSON( this.arrMarker);
+
+        // console.log(this.arrMarker);
+
+        // Marker.createMarker(this.map, newEvent);
     }
+
+
 }
 
 const instance = new App();

@@ -89,8 +89,8 @@ class App {
         this.elNewContent.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
         this.elNewDateStart.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
         this.elNewDateEnd.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
-        this.elCordLon.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
-        this.elCordLat.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
+        this.elCordLon.addEventListener( 'click', this.handlerRemoveError.bind(this) );
+        this.elCordLat.addEventListener( 'click', this.handlerRemoveError.bind(this) );
 
         let itemStorage = this.eventStorage.getJSON();
         // Si le stockage n'est pas encore crée on ne pass à la suite
@@ -108,6 +108,13 @@ class App {
         }
     }
 
+    placeMarker(position, map) {
+       const markerPos = new mapboxgl.Marker({
+            position: position,
+            map: map
+        });
+        map.panTo(position);
+    }
 
     // Gestionnaires d'événements
     /**
@@ -132,6 +139,17 @@ class App {
         const marker = new mapboxgl.Marker();
         marker.setLngLat({lon: localEvent.longitude, lat: localEvent.latitude});
         marker.addTo(this.mainMap);
+
+        const markerDiv = marker.getElement();
+        markerDiv.title = localEvent.title
+
+        marker.setPopup(new mapboxgl.Popup().setHTML(
+            'Nom : ' + localEvent.title +'<br/>'+
+            'Description : ' + localEvent.content +'<br/>'+
+            'Date de début : ' + localEvent.dateCreate +'<br/>'+
+            'Date de fin : ' + localEvent.dateEnd
+        ))
+
     }
 
 

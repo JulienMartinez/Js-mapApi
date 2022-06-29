@@ -1,4 +1,4 @@
-export class DummyControl {
+export class ReloadControl {
     map;
     container;
 
@@ -9,12 +9,12 @@ export class DummyControl {
         this.container.classList.add( 'mapboxgl-ctrl', 'mapboxgl-ctrl-group');
         this.container.innerHTML = '<button type="button" class="map-control-clown"><span>🔄</span></button>';
 
-        this.container.children[0].addEventListener( 'click', this.handlerDummyClick.bind(this) );
+        this.container.children[0].addEventListener( 'click', this.handlerReloadClick.bind(this) );
 
         return this.container;
     }
 
-    handlerDummyClick() {
+    handlerReloadClick() {
         location.reload();
     }
 }

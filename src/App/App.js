@@ -3,12 +3,14 @@ import config from '../../app.config';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl, {Map, Marker} from 'mapbox-gl';
 import { LocalEvent } from './Entity/LocalEvent';
+import {MapMarker} from './Entity/MapMarker';
 
 import '../../assets/css/reset.css';
 import '../../assets/css/style.css';
 
-import { LocalStorageService } from "./Service/LocalStorageService";
-import {DummyControl} from "./Mapbox/Control/DummyControl";
+import { LocalStorageService } from './Service/LocalStorageService';
+import {ReloadControl} from './Mapbox/Control/ReloadControl';
+// import {GeolocationControl} from './Mapbox/Control/GeolocationControl';
 
 const STORAGE_KEY = 'lidem-weather';
 
@@ -78,8 +80,8 @@ class App {
         });
         this.mainMap.addControl( geoLocControl, 'top-right' );
 
-        // Ajout d'un controle personnalisé "DummyControl"
-        const dummyControl = new DummyControl();
+        // Ajout d'un controle personnalisé "ReloadControl"
+        const dummyControl = new ReloadControl();
         this.mainMap.addControl( dummyControl, 'top-right' );
 
 

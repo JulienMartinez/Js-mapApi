@@ -55,16 +55,4 @@ export class LocalEvent {
             'Message : ' + text
         ))
     }
-
-    toJSON() {
-
-        return {
-            title: this.title,
-            content: this.content,
-            dateCreate: this.dateCreate,
-            dateEnd: this.dateEnd,
-            longitude: this.longitude,
-            latitude: this.latitude,
-        }
-    }
 }

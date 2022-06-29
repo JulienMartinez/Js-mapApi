@@ -2,13 +2,13 @@ import config from '../../app.config';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl, {Map, Marker} from 'mapbox-gl';
-import { LocalEvent } from './Entity/LocalEvent'
+import { LocalEvent } from './Entity/LocalEvent';
 
 import '../../assets/css/reset.css';
 import '../../assets/css/style.css';
 
 import { LocalStorageService } from "./Service/LocalStorageService";
-// import {DummyControl} from "./Mapbox/Control/DummyControl";
+import {DummyControl} from "./Mapbox/Control/DummyControl";
 
 const STORAGE_KEY = 'lidem-weather';
 
@@ -16,6 +16,7 @@ class App {
     eventStorage = null;
 
     arrMarker = [];
+
     isEditing = false;
 
     // Eléments de l'UI
@@ -77,6 +78,10 @@ class App {
         });
         this.mainMap.addControl( geoLocControl, 'top-right' );
 
+        // Ajout d'un controle personnalisé "DummyControl"
+        const dummyControl = new DummyControl();
+        this.mainMap.addControl( dummyControl, 'top-right' );
+
 
         // - Initialisation des gestionnaires d'événement
         this.elForm.addEventListener( 'submit', this.handlerSubmitNew.bind(this) );
@@ -127,7 +132,7 @@ class App {
             strDateCreate = this.elNewDateStart.value.trim(),
             strDateEnd = this.elNewDateEnd.value.trim(),
             strLong = this.elCordLon.value.trim(),
-            strlat = this.elCordLat.value.trim();
+            strLat = this.elCordLat.value.trim();
 
 
         // Vidange du formulaire
@@ -147,7 +152,7 @@ class App {
         newEvent.dateCreate = strDateCreate;
         newEvent.dateEnd = strDateEnd;
         newEvent.longitude = strLong;
-        newEvent.latitude =  strlat;
+        newEvent.latitude =  strLat;
 
         // Enregistrement
         this.arrMarker.push( new LocalEvent(newEvent));

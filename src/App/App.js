@@ -26,11 +26,8 @@ class App {
     elNewDateEnd = null;
     elCordLon = null;
     elCordLat = null;
-    elBoard = null;
 
     mainMap = null;
-
-
 
     constructor() {
         this.eventStorage = new LocalStorageService( STORAGE_KEY );
@@ -44,7 +41,6 @@ class App {
         this.elNewDateEnd = document.getElementById( 'date-end' );
         this.elCordLon = document.getElementById( 'long' );
         this.elCordLat = document.getElementById( 'lat' );
-        this.elBoard = document.getElementById( 'board' );
     }
 
     /**
@@ -59,8 +55,8 @@ class App {
         });
 
         this.mainMap.on('click', (evt) => {
-            console.log( evt );
-            console.log(`A click event has occurred at ${evt.lngLat}`);
+            this.elCordLon.value = evt.lngLat.lng;
+            this.elCordLat.value = evt.lngLat.lat;
         });
 
         // Ajout du contrôle de navigation (zoom, inclinaison, etc.)
@@ -78,7 +74,6 @@ class App {
                 enableHighAccuracy: true
             },
             showUserHeading: true,
-            // trackUserLocation: true
         });
         this.mainMap.addControl( geoLocControl, 'top-right' );
 
@@ -89,8 +84,8 @@ class App {
         this.elNewContent.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
         this.elNewDateStart.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
         this.elNewDateEnd.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
-        this.elCordLon.addEventListener( 'click', this.handlerRemoveError.bind(this) );
-        this.elCordLat.addEventListener( 'click', this.handlerRemoveError.bind(this) );
+        this.elCordLon.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
+        this.elCordLat.addEventListener( 'focus', this.handlerRemoveError.bind(this) );
 
         let itemStorage = this.eventStorage.getJSON();
         // Si le stockage n'est pas encore crée on ne pass à la suite
@@ -99,21 +94,13 @@ class App {
         for ( let notaJSON of itemStorage ) this.arrMarker.push( new LocalEvent( notaJSON));
 
         this.render(this.arrMarker);
-
     }
 
     render(arrLocalEvent) {
         for(let itemJSON of arrLocalEvent) {
-            this.setMarker(itemJSON)
+           const newLocalEvent = new LocalEvent( itemJSON);
+           newLocalEvent.setMarker(this.mainMap);
         }
-    }
-
-    placeMarker(position, map) {
-       const markerPos = new mapboxgl.Marker({
-            position: position,
-            map: map
-        });
-        map.panTo(position);
     }
 
     // Gestionnaires d'événements
@@ -123,35 +110,6 @@ class App {
     handlerRemoveError( evt) {
         evt.target.classList.remove( 'error' );
     }
-
-    /**
-     * Gestionnaire d'événement de purge des Notas
-     */
-    handlerBoardClear() {
-        if( this.isEditing ) return;
-
-        this.arrMarker = []; // Vidange du tableau de Notas
-        this.elBoard.innerHTML = ''; // Vidange du contenu affiché de board
-        this.eventStorage.clear();
-    }
-
-    setMarker(localEvent) {
-        const marker = new mapboxgl.Marker();
-        marker.setLngLat({lon: localEvent.longitude, lat: localEvent.latitude});
-        marker.addTo(this.mainMap);
-
-        const markerDiv = marker.getElement();
-        markerDiv.title = localEvent.title
-
-        marker.setPopup(new mapboxgl.Popup().setHTML(
-            'Nom : ' + localEvent.title +'<br/>'+
-            'Description : ' + localEvent.content +'<br/>'+
-            'Date de début : ' + localEvent.dateCreate +'<br/>'+
-            'Date de fin : ' + localEvent.dateEnd
-        ))
-
-    }
-
 
     /**
      * Gestionnaire d'événement de soumission du formulaire d'ajout
@@ -184,9 +142,6 @@ class App {
         // Traitement des données
         const newEvent = {};
 
-        newEvent.dateCreate
-            = newEvent.dateUpdate
-            = Date.now();
         newEvent.title = strTitle;
         newEvent.content = strContent;
         newEvent.dateCreate = strDateCreate;
@@ -194,24 +149,15 @@ class App {
         newEvent.longitude = strLong;
         newEvent.latitude =  strlat;
 
-        this.setMarker(newEvent);
-
         // Enregistrement
-        // Array.push() permet d'insérer une valeur à fin d'un tableau
-        this.arrMarker.push( new LocalEvent(newEvent ));
+        this.arrMarker.push( new LocalEvent(newEvent));
 
         // Mise à jour de l'affichage
         this.render(this.arrMarker);
 
         // Persistance des données
         this.eventStorage.setJSON( this.arrMarker);
-
-        // console.log(this.arrMarker);
-
-        // Marker.createMarker(this.map, newEvent);
     }
-
-
 }
 
 const instance = new App();

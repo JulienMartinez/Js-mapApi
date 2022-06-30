@@ -3,22 +3,19 @@ import config from '../../app.config';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl, {Map, Marker} from 'mapbox-gl';
 import { LocalEvent } from './Entity/LocalEvent';
-import {MapMarker} from './Entity/MapMarker';
 
 import '../../assets/css/reset.css';
 import '../../assets/css/style.css';
 
 import { LocalStorageService } from './Service/LocalStorageService';
-import {ReloadControl} from './Mapbox/Control/ReloadControl';
+import { ReloadControl } from './Mapbox/Control/ReloadControl';
 // import {GeolocationControl} from './Mapbox/Control/GeolocationControl';
 
 const STORAGE_KEY = 'lidem-weather';
 
 class App {
     eventStorage = null;
-
     arrMarker = [];
-
     isEditing = false;
 
     // Eléments de l'UI
@@ -98,14 +95,14 @@ class App {
         // Si le stockage n'est pas encore crée on ne pass à la suite
         if( itemStorage === null ) return;
 
-        for ( let notaJSON of itemStorage ) this.arrMarker.push( new LocalEvent( notaJSON));
+        for ( let markerJSON of itemStorage ) this.arrMarker.push( new LocalEvent( markerJSON));
 
         this.render(this.arrMarker);
     }
 
     render(arrLocalEvent) {
         for(let itemJSON of arrLocalEvent) {
-           const newLocalEvent = new LocalEvent( itemJSON);
+           const newLocalEvent = new LocalEvent(itemJSON);
            newLocalEvent.setMarker(this.mainMap);
         }
     }
@@ -122,7 +119,6 @@ class App {
      * Gestionnaire d'événement de soumission du formulaire d'ajout
      */
     handlerSubmitNew( evt ) {
-        // preventDefault() empêche le comportement initial de l'événement (ici le rechargement de la page)
         evt.preventDefault();
 
         if( this.isEditing ) return;
